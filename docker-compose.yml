@@ -1,0 +1,22 @@
+services:
+  wuwei-app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/db:/app/data/db
+      - ./data/audio:/app/data/audio
+      - ./logs:/app/logs
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - wuwei-app
+    restart: unless-stopped

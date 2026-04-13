@@ -1,0 +1,66 @@
+/* 适老化样式：大字体、大按钮、高对比度 */
+
+.gradio-container {
+    font-size: 20px !important;
+    max-width: 900px !important;
+    margin: 0 auto !important;
+}
+
+.header h1 {
+    font-size: 48px !important;
+    color: #2e7d32;
+    text-align: center;
+}
+
+.header h3 {
+    font-size: 24px !important;
+    color: #555;
+    text-align: center;
+}
+
+.big-dropdown label,
+.big-input label {
+    font-size: 22px !important;
+    font-weight: bold;
+}
+
+.big-dropdown select,
+.big-input input,
+.big-input textarea {
+    font-size: 22px !important;
+    padding: 14px !important;
+    min-height: 56px !important;
+}
+
+.big-chatbot {
+    font-size: 22px !important;
+    line-height: 1.8 !important;
+}
+
+.big-chatbot .message {
+    padding: 16px 20px !important;
+    border-radius: 16px !important;
+}
+
+.big-button {
+    font-size: 26px !important;
+    font-weight: bold !important;
+    min-height: 64px !important;
+    border-radius: 16px !important;
+}
+
+.big-audio {
+    min-height: 120px !important;
+}
+
+/* 高对比度 */
+@media (prefers-contrast: more) {
+    .gradio-container {
+        background: #000 !important;
+        color: #fff !important;
+    }
+    .big-button {
+        background: #ffeb3b !important;
+        color: #000 !important;
+    }
+}

@@ -63,14 +63,14 @@ class SpeechPipeline:
         sample_rate: int = 16000,
         user_id: str = "",
         dialect_hint: DialectCode | None = None,
-    ) -> tuple[str, DialectCode]:
+    ) -> tuple[str, str, DialectCode]:
         """
-        处理语音输入，返回识别文本和检测到的方言。
+        处理语音输入，返回 (ASR 原文, 规范化为普通话后的文本, 检测到的方言)。
 
         完整流程:
         1. 方言检测（若无 hint）
         2. ASR 识别
-        3. 文本规范化
+        3. 文本规范化（方言 → 普通话）
         """
         # 1. 确定方言
         dialect = dialect_hint or DialectCode.MANDARIN
@@ -86,7 +86,7 @@ class SpeechPipeline:
             f"语音识别完成: dialect={result.dialect_detected}, "
             f"raw='{result.text}', normalized='{normalized}'"
         )
-        return normalized, result.dialect_detected
+        return result.text, normalized, result.dialect_detected
 
     async def synthesize_response(
         self,

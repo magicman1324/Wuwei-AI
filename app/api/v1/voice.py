@@ -39,7 +39,7 @@ async def voice_chat(
     dialect = DialectCode(dialect_hint) if dialect_hint else None
 
     # 1. ASR + 规范化
-    normalized_text, detected_dialect = await pipeline.process_voice(
+    raw_text, normalized_text, detected_dialect = await pipeline.process_voice(
         audio_data=audio_data,
         user_id=user_id,
         dialect_hint=dialect,
@@ -65,7 +65,7 @@ async def voice_chat(
         pass  # TTS 未配置时跳过
 
     return VoiceResponse(
-        recognized_text=result.raw_llm_response,
+        recognized_text=raw_text,
         normalized_text=normalized_text,
         response_text=result.text,
         dialect_detected=detected_dialect.value,

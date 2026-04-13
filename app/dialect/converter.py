@@ -1,4 +1,9 @@
-"""方言转换器：基于词典的普通话 ↔ 方言互转。"""
+"""方言转换器：基于词典的普通话 ↔ 方言互转。
+
+实现要点：
+- 同时扫描所有候选词，按"最长匹配优先"避免子串误替换。
+- 单遍扫描（O(n·k)，k=字典最大词长），不会因替换顺序改变结果。
+"""
 
 import json
 from pathlib import Path
@@ -6,6 +11,35 @@ from pathlib import Path
 from loguru import logger
 
 from app.dialect.adapter import DialectCode
+
+
+def _replace_longest_match(text: str, mapping: dict[str, str]) -> str:
+    """单遍扫描，最长匹配优先替换。
+
+    例：mapping = {"食": "吃", "食饭": "吃饭"}，"食饭" → "吃饭"（而非 "吃饭"）。
+    空字符串或空字典直接返回原文。
+    """
+    if not text or not mapping:
+        return text
+
+    max_len = max(len(k) for k in mapping)
+    out: list[str] = []
+    i = 0
+    n = len(text)
+    while i < n:
+        matched = False
+        # 从最长可能的子串开始尝试
+        for length in range(min(max_len, n - i), 0, -1):
+            substr = text[i : i + length]
+            if substr in mapping:
+                out.append(mapping[substr])
+                i += length
+                matched = True
+                break
+        if not matched:
+            out.append(text[i])
+            i += 1
+    return "".join(out)
 
 
 class DialectConverter:
@@ -32,18 +66,13 @@ class DialectConverter:
 
         # dictionary.json 格式: {"方言词": "普通话词", ...}
         self._to_mandarin_map = mapping
+        # 反向映射时若多个方言词映射到同一普通话词，后者覆盖前者（保留字典后定义项）
         self._from_mandarin_map = {v: k for k, v in mapping.items()}
 
     def to_mandarin(self, text: str) -> str:
-        """方言文本 → 普通话文本（基于词典替换）。"""
-        result = text
-        for dialect_word, mandarin_word in self._to_mandarin_map.items():
-            result = result.replace(dialect_word, mandarin_word)
-        return result
+        """方言文本 → 普通话文本（最长匹配替换）。"""
+        return _replace_longest_match(text, self._to_mandarin_map)
 
     def from_mandarin(self, text: str) -> str:
-        """普通话文本 → 方言化表达（基于词典替换）。"""
-        result = text
-        for mandarin_word, dialect_word in self._from_mandarin_map.items():
-            result = result.replace(mandarin_word, dialect_word)
-        return result
+        """普通话文本 → 方言化表达（最长匹配替换）。"""
+        return _replace_longest_match(text, self._from_mandarin_map)

@@ -7,7 +7,7 @@ from app.dialect.adapter import DialectCode, DialectRegistry
 
 
 def test_all_mvp_dialects_registered() -> None:
-    registered = DialectRegistry.list_registered()
+    registered = DialectRegistry.available_dialects()
     assert DialectCode.MANDARIN in registered
     assert DialectCode.CANTONESE in registered
     assert DialectCode.SICHUAN in registered

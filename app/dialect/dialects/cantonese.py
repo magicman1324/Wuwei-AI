@@ -34,14 +34,15 @@ class CantoneseAdapter(DialectAdapter):
     def get_asr_config(self) -> dict:
         return {
             "provider": "iflytek",
-            "language": "cantonese",
-            "accent": "guangdong",
+            "language": "zh_cn",
+            "accent": "cantonese",
         }
 
     def get_tts_config(self) -> dict:
+        # xiaomei 是讯飞常见的粤语女声发音人；若控制台未开通可改其他 vcn
         return {
             "provider": "iflytek",
-            "voice_name": "xiaoyan_cantonese",
+            "voice_name": "xiaomei",
             "speed": 0.85,
             "volume": 1.2,
         }

@@ -34,14 +34,15 @@ class SichuanAdapter(DialectAdapter):
     def get_asr_config(self) -> dict:
         return {
             "provider": "iflytek",
-            "language": "mandarin",
-            "accent": "sichuan",
+            "language": "zh_cn",
+            "accent": "lmz",  # 讯飞四川话 accent 内部代号
         }
 
     def get_tts_config(self) -> dict:
+        # xiaorong 是讯飞常见的四川话发音人；若控制台未开通可改其他 vcn
         return {
             "provider": "iflytek",
-            "voice_name": "xiaoyan_sichuan",
+            "voice_name": "xiaorong",
             "speed": 0.85,
             "volume": 1.2,
         }

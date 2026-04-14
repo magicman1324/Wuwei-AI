@@ -23,15 +23,17 @@ class MandarinAdapter(DialectAdapter):
         return "请用标准普通话回答，语言简洁清晰。"
 
     def get_asr_config(self) -> dict:
+        # 默认 iflytek，若配置了阿里云凭据 SpeechPipeline 可在运行期重写
         return {
-            "provider": "aliyun",
-            "language": "zh-CN",
+            "provider": "iflytek",
+            "language": "zh_cn",
+            "accent": "mandarin",
         }
 
     def get_tts_config(self) -> dict:
         return {
-            "provider": "aliyun",
-            "voice_name": "zhixiaobai",
+            "provider": "iflytek",
+            "voice_name": "xiaoyan",
             "speed": 0.85,
             "volume": 1.2,
         }

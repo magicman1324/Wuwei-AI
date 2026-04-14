@@ -33,10 +33,57 @@ class SpeechPipeline:
         self._tts_engines: dict[str, BaseTTS] = {}
         self._init_engines()
 
-    def _init_engines(self):
-        """根据配置初始化 ASR/TTS 引擎。"""
-        # TODO: 根据 settings 中的 API 密钥初始化讯飞/阿里云引擎
-        logger.info("语音引擎初始化（待配置 API 密钥）")
+    def _init_engines(self) -> None:
+        """根据 settings 中的凭据初始化可用的 ASR/TTS 引擎。
+
+        行为：
+        - 讯飞凭据齐全 → 注册 iflytek ASR/TTS
+        - 阿里云凭据齐全 → 注册 aliyun ASR（TTS 暂无实现）
+        - 若 dialect 指定的 provider 未配置，fallback 到 iflytek
+        - 两者都空 → 保持空 dict，get_asr/get_tts 调用时会 raise（voice.py 做降级）
+        """
+        s = self.settings
+
+        if s.iflytek_app_id and s.iflytek_api_key and s.iflytek_api_secret:
+            from app.speech.asr.iflytek import IflytekASR
+            from app.speech.tts.iflytek import IflytekTTS
+
+            self._asr_engines["iflytek"] = IflytekASR(
+                app_id=s.iflytek_app_id,
+                api_key=s.iflytek_api_key,
+                api_secret=s.iflytek_api_secret,
+            )
+            self._tts_engines["iflytek"] = IflytekTTS(
+                app_id=s.iflytek_app_id,
+                api_key=s.iflytek_api_key,
+                api_secret=s.iflytek_api_secret,
+            )
+            logger.info("讯飞 ASR/TTS 引擎已初始化")
+
+        if s.aliyun_access_key and s.aliyun_access_secret:
+            try:
+                from app.speech.asr.aliyun import AliyunASR
+
+                self._asr_engines["aliyun"] = AliyunASR(
+                    access_key=s.aliyun_access_key,
+                    access_secret=s.aliyun_access_secret,
+                    app_key=s.aliyun_asr_app_key,
+                )
+                logger.info("阿里云 ASR 引擎已初始化")
+            except (NotImplementedError, ImportError) as exc:
+                logger.warning(f"阿里云 ASR 未启用: {exc}")
+
+        # Fallback: 某些 adapter 可能仍配置 provider=aliyun，
+        # 若未注册，则别名到 iflytek（普通话场景 iflytek 本身就支持）。
+        if "iflytek" in self._asr_engines and "aliyun" not in self._asr_engines:
+            self._asr_engines["aliyun"] = self._asr_engines["iflytek"]
+        if "iflytek" in self._tts_engines and "aliyun" not in self._tts_engines:
+            self._tts_engines["aliyun"] = self._tts_engines["iflytek"]
+
+        if not self._asr_engines:
+            logger.warning("未配置任何 ASR 凭据，语音识别功能不可用")
+        if not self._tts_engines:
+            logger.warning("未配置任何 TTS 凭据，语音合成功能不可用")
 
     def get_asr(self, dialect: DialectCode) -> BaseASR:
         """根据方言获取对应的 ASR 引擎。"""

@@ -31,9 +31,10 @@ class MandarinAdapter(DialectAdapter):
         }
 
     def get_tts_config(self) -> dict:
+        # xiaolu = 讯飞小露（普通话女声）, 需在讯飞控制台开通
         return {
             "provider": "iflytek",
-            "voice_name": "xiaoyan",
+            "voice_name": "xiaolu",
             "speed": 0.85,
             "volume": 1.2,
         }

@@ -159,7 +159,7 @@ async def test_synthesize_response_passes_tts_config() -> None:
     assert fmt == "mp3"
     fake_tts.synthesize.assert_awaited_once()
     call_kwargs = fake_tts.synthesize.call_args.kwargs
-    assert call_kwargs["voice_name"] == "lingxiaolu"  # 粤语回退到情感女声
+    assert call_kwargs["voice_name"] == "xiaomei"  # 讯飞小梅（广东话女声）
     assert call_kwargs["speed"] == 0.85            # 适老化默认
     assert call_kwargs["volume"] == 1.2
 

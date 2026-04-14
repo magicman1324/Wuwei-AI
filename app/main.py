@@ -50,9 +50,13 @@ def create_app() -> FastAPI:
     try:
         import gradio as gr
 
+        from app.dependencies import get_chat_engine, get_speech_pipeline
         from app.ui.gradio_app import create_gradio_ui
 
-        gradio_app = create_gradio_ui(settings)
+        gradio_app = create_gradio_ui(
+            chat_engine=get_chat_engine(),
+            speech_pipeline=get_speech_pipeline(),
+        )
         app = gr.mount_gradio_app(app, gradio_app, path="/")
         logger.info("Gradio UI 已挂载到 /")
     except ImportError:

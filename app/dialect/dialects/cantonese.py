@@ -39,10 +39,11 @@ class CantoneseAdapter(DialectAdapter):
         }
 
     def get_tts_config(self) -> dict:
-        # xiaomei 是讯飞常见的粤语女声发音人；若控制台未开通可改其他 vcn
+        # 未开通粤语专用声音时回退到 lingxiaolu（聆小璐-情感，普通话朗读粤语文本）
+        # 若后续开通粤语声音（如 xiaomei），改回对应 vcn 即可
         return {
             "provider": "iflytek",
-            "voice_name": "xiaomei",
+            "voice_name": "lingxiaolu",
             "speed": 0.85,
             "volume": 1.2,
         }

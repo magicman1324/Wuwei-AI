@@ -159,13 +159,13 @@ async def test_synthesize_response_passes_tts_config() -> None:
     assert fmt == "mp3"
     fake_tts.synthesize.assert_awaited_once()
     call_kwargs = fake_tts.synthesize.call_args.kwargs
-    assert call_kwargs["voice_name"] == "xiaomei"  # 粤语发音人
+    assert call_kwargs["voice_name"] == "lingxiaolu"  # 粤语回退到情感女声
     assert call_kwargs["speed"] == 0.85            # 适老化默认
     assert call_kwargs["volume"] == 1.2
 
 
 @pytest.mark.asyncio
-async def test_synthesize_response_mandarin_uses_xiaolu() -> None:
+async def test_synthesize_response_mandarin_uses_lingxiaolu() -> None:
     s = _settings(
         iflytek_app_id="a", iflytek_api_key="k", iflytek_api_secret="sec",
     )
@@ -178,7 +178,7 @@ async def test_synthesize_response_mandarin_uses_xiaolu() -> None:
     p._tts_engines["iflytek"] = fake_tts
 
     await p.synthesize_response("今天天气不错", DialectCode.MANDARIN)
-    assert fake_tts.synthesize.call_args.kwargs["voice_name"] == "xiaolu"
+    assert fake_tts.synthesize.call_args.kwargs["voice_name"] == "lingxiaolu"
 
 
 @pytest.mark.asyncio

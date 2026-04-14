@@ -11,6 +11,7 @@ class Settings(BaseSettings):
 
     # 数据库
     database_url: str = "sqlite:///./data/db/wuwei.db"
+    db_echo: bool = False
 
     # LLM
     llm_provider: str = "qwen"

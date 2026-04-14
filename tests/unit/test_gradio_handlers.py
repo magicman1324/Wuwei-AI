@@ -36,7 +36,10 @@ async def test_text_chat_appends_to_history() -> None:
     history, cleared = await handle_text_chat(
         "你好", [], "cmn", "u1", chat_engine=engine,
     )
-    assert history == [["你好", "我很好"]]
+    assert history == [
+        {"role": "user", "content": "你好"},
+        {"role": "assistant", "content": "我很好"},
+    ]
     assert cleared == ""
     engine.chat_text.assert_awaited_once()
 
@@ -44,10 +47,11 @@ async def test_text_chat_appends_to_history() -> None:
 @pytest.mark.asyncio
 async def test_text_chat_empty_message_no_op() -> None:
     engine = _fake_chat_engine()
+    prior = [{"role": "user", "content": "前轮"}, {"role": "assistant", "content": "前回复"}]
     history, cleared = await handle_text_chat(
-        "   ", [["前轮", "前回复"]], "cmn", "u1", chat_engine=engine,
+        "   ", prior, "cmn", "u1", chat_engine=engine,
     )
-    assert history == [["前轮", "前回复"]]
+    assert history == prior
     assert cleared == ""
     engine.chat_text.assert_not_awaited()
 
@@ -80,12 +84,13 @@ def _fake_pipeline(
 
 @pytest.mark.asyncio
 async def test_voice_chat_no_audio_returns_history_unchanged() -> None:
+    prior = [{"role": "user", "content": "a"}, {"role": "assistant", "content": "b"}]
     history, audio_path = await handle_voice_chat(
-        None, [["a", "b"]], "cmn", "u1",
+        None, prior, "cmn", "u1",
         chat_engine=_fake_chat_engine(),
         speech_pipeline=_fake_pipeline(),
     )
-    assert history == [["a", "b"]]
+    assert history == prior
     assert audio_path is None
 
 
@@ -98,7 +103,8 @@ async def test_voice_chat_pipeline_unconfigured_returns_hint() -> None:
         chat_engine=engine, speech_pipeline=None,
     )
     assert audio_path is None
-    assert "未配置" in history[-1][1]
+    assert history[-1]["role"] == "assistant"
+    assert "未配置" in history[-1]["content"]
     engine.chat.assert_not_awaited()
 
 
@@ -125,8 +131,9 @@ async def test_voice_chat_full_path_appends_history_and_returns_audio_path() -> 
     assert engine.chat.call_args.kwargs["user_input"] == "我吃了饭"
     assert engine.chat.call_args.kwargs["dialect"] == DialectCode.CANTONESE
 
-    # 历史展示 ASR 原文 + LLM 回复
-    assert history[-1] == ["我食咗饭", "吃过了就好"]
+    # 历史展示 ASR 原文 + LLM 回复（messages 格式）
+    assert history[-2] == {"role": "user", "content": "我食咗饭"}
+    assert history[-1] == {"role": "assistant", "content": "吃过了就好"}
 
     # 音频路径已写入
     assert audio_path and os.path.exists(audio_path)
@@ -146,7 +153,7 @@ async def test_voice_chat_empty_asr_text_prompts_retry() -> None:
         chat_engine=engine, speech_pipeline=pipeline,
     )
     assert audio_path is None
-    assert "再说一次" in history[-1][1]
+    assert "再说一次" in history[-1]["content"]
     engine.chat.assert_not_awaited()
 
 
@@ -161,8 +168,8 @@ async def test_voice_chat_asr_failure_shows_error_in_history() -> None:
         chat_engine=_fake_chat_engine(), speech_pipeline=pipeline,
     )
     assert audio_path is None
-    assert "语音识别失败" in history[-1][0]
-    assert "auth failed" in history[-1][1]
+    assert "语音识别失败" in history[-2]["content"]
+    assert "auth failed" in history[-1]["content"]
 
 
 @pytest.mark.asyncio
@@ -177,5 +184,6 @@ async def test_voice_chat_tts_failure_still_returns_text_reply() -> None:
         chat_engine=engine, speech_pipeline=pipeline,
     )
     # 文字回复仍在历史里，audio_path 为空
-    assert history[-1] == ["我食咗饭", "好的"]
+    assert history[-2] == {"role": "user", "content": "我食咗饭"}
+    assert history[-1] == {"role": "assistant", "content": "好的"}
     assert audio_path is None

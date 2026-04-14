@@ -44,15 +44,23 @@ def _voice_enabled(pipeline: SpeechPipeline | None) -> bool:
     )
 
 
+def _msg(role: str, content: str) -> dict[str, str]:
+    """构造 Gradio Chatbot(type='messages') 期望的消息字典。"""
+    return {"role": role, "content": content}
+
+
 async def handle_text_chat(
     message: str,
-    history: list[list[str]],
+    history: list[dict],
     dialect: str,
     user_id: str,
     *,
     chat_engine: ChatEngine,
-) -> tuple[list[list[str]], str]:
-    """文字消息 handler — 模块级以便单测。"""
+) -> tuple[list[dict], str]:
+    """文字消息 handler — 模块级以便单测。
+
+    返回 OpenAI messages 格式: [{"role":"user|assistant","content":"..."}, ...]
+    """
     if not message.strip():
         return history, ""
     code = _coerce_dialect(dialect)
@@ -61,24 +69,31 @@ async def handle_text_chat(
         user_id=user_id or "anonymous",
         dialect=code,
     )
-    return history + [[message, result.text]], ""
+    return history + [_msg("user", message), _msg("assistant", result.text)], ""
 
 
 async def handle_voice_chat(
     audio: Optional[tuple[int, np.ndarray]],
-    history: list[list[str]],
+    history: list[dict],
     dialect: str,
     user_id: str,
     *,
     chat_engine: ChatEngine,
     speech_pipeline: SpeechPipeline | None,
-) -> tuple[list[list[str]], Optional[str]]:
+) -> tuple[list[dict], Optional[str]]:
     """麦克风录音 → ASR → LLM → TTS → 播放。模块级 handler，便于单测。"""
     if audio is None:
         return history, None
 
     if not _voice_enabled(speech_pipeline):
-        return history + [["[语音]", "语音功能未配置，请填写讯飞凭据后重试。"]], None
+        return (
+            history
+            + [
+                _msg("user", "🎤 [语音]"),
+                _msg("assistant", "语音功能未配置，请填写讯飞凭据后重试。"),
+            ],
+            None,
+        )
 
     assert speech_pipeline is not None  # for type checker
 
@@ -100,10 +115,24 @@ async def handle_voice_chat(
         )
     except Exception as exc:
         logger.exception("ASR 失败")
-        return history + [["[语音识别失败]", f"({exc})"]], None
+        return (
+            history
+            + [
+                _msg("user", "🎤 [语音识别失败]"),
+                _msg("assistant", f"出错了：{exc}"),
+            ],
+            None,
+        )
 
     if not raw_text.strip():
-        return history + [["[未识别到内容]", "请再说一次～"]], None
+        return (
+            history
+            + [
+                _msg("user", "🎤 [未识别到内容]"),
+                _msg("assistant", "请再说一次～"),
+            ],
+            None,
+        )
 
     # LLM 用规范化后的普通话文本，但聊天记录展示 ASR 原文
     chat_result = await chat_engine.chat(
@@ -124,7 +153,11 @@ async def handle_voice_chat(
     except Exception as exc:
         logger.warning(f"TTS 合成失败，仅返回文字: {exc}")
 
-    return history + [[raw_text, chat_result.text]], audio_path
+    return (
+        history
+        + [_msg("user", raw_text), _msg("assistant", chat_result.text)],
+        audio_path,
+    )
 
 
 def create_gradio_ui(

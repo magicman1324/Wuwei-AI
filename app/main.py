@@ -63,3 +63,7 @@ def create_app() -> FastAPI:
         logger.warning("Gradio 未安装，跳过 UI 挂载")
 
     return app
+
+
+# 模块级实例，供 uvicorn app.main:app 直接使用
+app = create_app()

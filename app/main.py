@@ -51,13 +51,20 @@ def create_app() -> FastAPI:
         import gradio as gr
 
         from app.dependencies import get_chat_engine, get_speech_pipeline
-        from app.ui.gradio_app import create_gradio_ui
+        from app.ui.gradio_app import create_gradio_ui, get_ui_css, get_ui_theme
 
         gradio_app = create_gradio_ui(
             chat_engine=get_chat_engine(),
             speech_pipeline=get_speech_pipeline(),
         )
-        app = gr.mount_gradio_app(app, gradio_app, path="/")
+        # Gradio 6.0 起 theme/css 从 Blocks() 移到 mount_gradio_app()
+        app = gr.mount_gradio_app(
+            app,
+            gradio_app,
+            path="/",
+            theme=get_ui_theme(),
+            css=get_ui_css() or None,
+        )
         logger.info("Gradio UI 已挂载到 /")
     except ImportError:
         logger.warning("Gradio 未安装，跳过 UI 挂载")

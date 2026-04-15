@@ -29,6 +29,16 @@ def _load_css() -> str:
     return ""
 
 
+def get_ui_theme() -> gr.themes.ThemeClass:
+    """Gradio 6 的主题已从 Blocks() 移到 mount_gradio_app()。"""
+    return gr.themes.Soft()
+
+
+def get_ui_css() -> str:
+    """Gradio 6 的自定义 CSS 已从 Blocks() 移到 mount_gradio_app()。"""
+    return _load_css()
+
+
 def _coerce_dialect(value: str) -> DialectCode:
     try:
         return DialectCode(value)
@@ -186,11 +196,7 @@ def create_gradio_ui(
             speech_pipeline=speech_pipeline,
         )
 
-    with gr.Blocks(
-        title="无为AI · 方言聊天",
-        css=_load_css(),
-        theme=gr.themes.Soft(),
-    ) as demo:
+    with gr.Blocks(title="无为AI · 方言聊天") as demo:
         gr.Markdown(
             """
             # 🌿 无为AI

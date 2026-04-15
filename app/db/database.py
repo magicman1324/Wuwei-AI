@@ -3,16 +3,33 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from functools import lru_cache
+from pathlib import Path
 
 from sqlmodel import Session, SQLModel, create_engine
 
 from app.config import get_settings
 
 
+def _ensure_sqlite_parent_dir(database_url: str) -> None:
+    """如果是 SQLite 文件 URL，确保父目录存在（首次启动体验）。"""
+    if not database_url.startswith("sqlite"):
+        return
+    # sqlite:///./data/db/wuwei.db → ./data/db/wuwei.db
+    # sqlite:////abs/path.db      → /abs/path.db
+    # sqlite:///:memory: → 跳过
+    _, _, path_part = database_url.partition("sqlite:///")
+    if not path_part or path_part.startswith(":memory:"):
+        return
+    db_path = Path(path_part)
+    if db_path.parent and not db_path.parent.exists():
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+
+
 @lru_cache
 def get_engine():
     """返回全局 SQLAlchemy engine 单例。"""
     settings = get_settings()
+    _ensure_sqlite_parent_dir(settings.database_url)
     connect_args = {}
     if settings.database_url.startswith("sqlite"):
         connect_args["check_same_thread"] = False

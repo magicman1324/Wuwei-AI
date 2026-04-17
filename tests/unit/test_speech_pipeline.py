@@ -182,7 +182,7 @@ async def test_synthesize_response_mandarin_uses_x4_lingbosong() -> None:
 
 
 @pytest.mark.asyncio
-async def test_synthesize_response_sichuan_uses_xiaorong() -> None:
+async def test_synthesize_response_sichuan_uses_x3_yezi_sc() -> None:
     s = _settings(
         iflytek_app_id="a", iflytek_api_key="k", iflytek_api_secret="sec",
     )
@@ -195,4 +195,4 @@ async def test_synthesize_response_sichuan_uses_xiaorong() -> None:
     p._tts_engines["iflytek"] = fake_tts
 
     await p.synthesize_response("巴适得很", DialectCode.SICHUAN)
-    assert fake_tts.synthesize.call_args.kwargs["voice_name"] == "xiaorong"
+    assert fake_tts.synthesize.call_args.kwargs["voice_name"] == "x3_yezi_sc"

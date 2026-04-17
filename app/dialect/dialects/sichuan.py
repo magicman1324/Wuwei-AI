@@ -39,10 +39,10 @@ class SichuanAdapter(DialectAdapter):
         }
 
     def get_tts_config(self) -> dict:
-        # xiaorong 是讯飞常见的四川话发音人；若控制台未开通可改其他 vcn
+        # x3_yezi_sc = 叶子（四川话 V3.0），自然度高
         return {
             "provider": "iflytek",
-            "voice_name": "xiaorong",
+            "voice_name": "x3_yezi_sc",
             "speed": 0.85,
             "volume": 1.2,
         }

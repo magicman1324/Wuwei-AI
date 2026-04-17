@@ -165,7 +165,7 @@ async def test_synthesize_response_passes_tts_config() -> None:
 
 
 @pytest.mark.asyncio
-async def test_synthesize_response_mandarin_uses_lingbosong() -> None:
+async def test_synthesize_response_mandarin_uses_x4_lingbosong() -> None:
     s = _settings(
         iflytek_app_id="a", iflytek_api_key="k", iflytek_api_secret="sec",
     )
@@ -178,7 +178,7 @@ async def test_synthesize_response_mandarin_uses_lingbosong() -> None:
     p._tts_engines["iflytek"] = fake_tts
 
     await p.synthesize_response("今天天气不错", DialectCode.MANDARIN)
-    assert fake_tts.synthesize.call_args.kwargs["voice_name"] == "lingbosong"
+    assert fake_tts.synthesize.call_args.kwargs["voice_name"] == "x4_lingbosong"
 
 
 @pytest.mark.asyncio

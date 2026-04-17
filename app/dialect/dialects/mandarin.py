@@ -31,10 +31,10 @@ class MandarinAdapter(DialectAdapter):
         }
 
     def get_tts_config(self) -> dict:
-        # lingbosong = 聆伯松（普通话男声），自然度高
+        # x4_lingbosong = 聆伯松（普通话男声），自然度高
         return {
             "provider": "iflytek",
-            "voice_name": "lingbosong",
+            "voice_name": "x4_lingbosong",
             "speed": 0.85,
             "volume": 1.2,
         }

@@ -25,13 +25,13 @@ class UserRepository:
         *,
         phone: Optional[str] = None,
         device_id: Optional[str] = None,
-        nickname: Optional[str] = None,
+        display_name: str = "用户",
         dialect_preference: str = "mandarin",
     ) -> User:
         user = User(
             phone=phone,
             device_id=device_id,
-            nickname=nickname,
+            display_name=display_name,
             dialect_preference=dialect_preference,
         )
         self.session.add(user)
@@ -46,7 +46,7 @@ class UserRepository:
         dialect_preference: Optional[str] = None,
         tts_speed: Optional[float] = None,
         tts_volume: Optional[float] = None,
-        font_size: Optional[int] = None,
+        font_size: Optional[str] = None,
     ) -> Optional[User]:
         user = self.get_by_id(user_id)
         if user is None:

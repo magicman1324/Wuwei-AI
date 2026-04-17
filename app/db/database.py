@@ -5,6 +5,7 @@ from collections.abc import Iterator
 from functools import lru_cache
 from pathlib import Path
 
+from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, SQLModel, create_engine
 
 from app.config import get_settings
@@ -31,12 +32,16 @@ def get_engine():
     settings = get_settings()
     _ensure_sqlite_parent_dir(settings.database_url)
     connect_args = {}
+    kwargs = {}
     if settings.database_url.startswith("sqlite"):
         connect_args["check_same_thread"] = False
+        if ":memory:" in settings.database_url:
+            kwargs["poolclass"] = StaticPool
     engine = create_engine(
         settings.database_url,
         echo=settings.db_echo,
         connect_args=connect_args,
+        **kwargs,
     )
     return engine
 

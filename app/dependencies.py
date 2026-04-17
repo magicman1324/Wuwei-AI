@@ -18,8 +18,23 @@ def get_cached_settings() -> Settings:
 
 @lru_cache
 def get_memory() -> ConversationMemory:
-    """FastAPI 依赖：获取全局共享的对话记忆管理器。"""
-    return ConversationMemory()
+    """FastAPI 依赖：获取全局共享的对话记忆管理器。
+
+    当数据库可用时自动注入 session_factory 实现对话持久化。
+    """
+    try:
+        from app.db.database import get_engine
+
+        from sqlmodel import Session
+
+        engine = get_engine()
+
+        def session_factory() -> Session:
+            return Session(engine)
+
+        return ConversationMemory(session_factory=session_factory)
+    except Exception:
+        return ConversationMemory()
 
 
 @lru_cache

@@ -33,7 +33,7 @@ def _fake_chat_engine(reply_text: str = "你好呀") -> AsyncMock:
 @pytest.mark.asyncio
 async def test_text_chat_appends_to_history() -> None:
     engine = _fake_chat_engine("我很好")
-    history, cleared = await handle_text_chat(
+    history, cleared, audio_path = await handle_text_chat(
         "你好", [], "cmn", "u1", chat_engine=engine,
     )
     assert history == [
@@ -41,6 +41,7 @@ async def test_text_chat_appends_to_history() -> None:
         {"role": "assistant", "content": "我很好"},
     ]
     assert cleared == ""
+    assert audio_path is None  # 无 speech_pipeline 时不合成
     engine.chat_text.assert_awaited_once()
 
 
@@ -48,11 +49,12 @@ async def test_text_chat_appends_to_history() -> None:
 async def test_text_chat_empty_message_no_op() -> None:
     engine = _fake_chat_engine()
     prior = [{"role": "user", "content": "前轮"}, {"role": "assistant", "content": "前回复"}]
-    history, cleared = await handle_text_chat(
+    history, cleared, audio_path = await handle_text_chat(
         "   ", prior, "cmn", "u1", chat_engine=engine,
     )
     assert history == prior
     assert cleared == ""
+    assert audio_path is None
     engine.chat_text.assert_not_awaited()
 
 
@@ -62,6 +64,22 @@ async def test_text_chat_invalid_dialect_falls_back() -> None:
     await handle_text_chat("hi", [], "not-a-dialect", "u1", chat_engine=engine)
     call = engine.chat_text.call_args
     assert call.kwargs["dialect"] == DialectCode.MANDARIN
+
+
+@pytest.mark.asyncio
+async def test_text_chat_with_pipeline_returns_audio() -> None:
+    engine = _fake_chat_engine("你好呀")
+    pipeline = _fake_pipeline()
+    history, cleared, audio_path = await handle_text_chat(
+        "你好", [], "cmn", "u1",
+        chat_engine=engine, speech_pipeline=pipeline,
+    )
+    assert history[-1] == {"role": "assistant", "content": "你好呀"}
+    assert cleared == ""
+    assert audio_path is not None
+    import os
+    assert os.path.exists(audio_path)
+    os.unlink(audio_path)
 
 
 # ---- handle_voice_chat ----

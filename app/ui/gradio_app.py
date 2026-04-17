@@ -66,20 +66,36 @@ async def handle_text_chat(
     user_id: str,
     *,
     chat_engine: ChatEngine,
-) -> tuple[list[dict], str]:
+    speech_pipeline: SpeechPipeline | None = None,
+) -> tuple[list[dict], str, Optional[str]]:
     """文字消息 handler — 模块级以便单测。
 
-    返回 OpenAI messages 格式: [{"role":"user|assistant","content":"..."}, ...]
+    返回 (更新后的 history, 清空的输入框, 语音文件路径或 None)。
     """
     if not message.strip():
-        return history, ""
+        return history, "", None
     code = _coerce_dialect(dialect)
     result = await chat_engine.chat_text(
         text=message,
         user_id=user_id or "anonymous",
         dialect=code,
     )
-    return history + [_msg("user", message), _msg("assistant", result.text)], ""
+    new_history = history + [_msg("user", message), _msg("assistant", result.text)]
+
+    # TTS 合成（有 pipeline 时自动播报回复）
+    audio_path: Optional[str] = None
+    if speech_pipeline is not None and bool(speech_pipeline._tts_engines):
+        try:
+            audio_bytes, audio_fmt = await speech_pipeline.synthesize_response(
+                text=result.text,
+                dialect=code,
+            )
+            if audio_bytes:
+                audio_path = write_audio_tempfile(audio_bytes, suffix=f".{audio_fmt}")
+        except Exception as exc:
+            logger.warning(f"文字回复 TTS 合成失败: {exc}")
+
+    return new_history, "", audio_path
 
 
 async def handle_voice_chat(
@@ -183,7 +199,9 @@ def create_gradio_ui(
 
     async def _on_text_submit(message, history, dialect, user_id):
         return await handle_text_chat(
-            message, history, dialect, user_id, chat_engine=chat_engine
+            message, history, dialect, user_id,
+            chat_engine=chat_engine,
+            speech_pipeline=speech_pipeline,
         )
 
     async def _on_voice_submit(audio, history, dialect, user_id):
@@ -258,12 +276,12 @@ def create_gradio_ui(
         send_btn.click(
             _on_text_submit,
             inputs=[text_input, chatbot, dialect_selector, user_id_box],
-            outputs=[chatbot, text_input],
+            outputs=[chatbot, text_input, audio_output],
         )
         text_input.submit(
             _on_text_submit,
             inputs=[text_input, chatbot, dialect_selector, user_id_box],
-            outputs=[chatbot, text_input],
+            outputs=[chatbot, text_input, audio_output],
         )
         audio_input.stop_recording(
             _on_voice_submit,

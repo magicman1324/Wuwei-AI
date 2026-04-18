@@ -15,6 +15,7 @@ dependencies = [
     "python-multipart>=0.0.9",
     "aiofiles>=24.1.0",
     "websockets>=13.0",
+    "alembic>=1.18.4",
 ]
 
 [project.optional-dependencies]

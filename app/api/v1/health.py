@@ -11,7 +11,7 @@ router = APIRouter()
 async def health_check():
     return {
         "status": "ok",
-        "service": "无为AI",
+        "service": "无维AI",
         "dialects": DialectRegistry.list_dialect_info(),
     }
 

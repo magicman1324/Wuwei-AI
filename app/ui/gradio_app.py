@@ -214,10 +214,10 @@ def create_gradio_ui(
             speech_pipeline=speech_pipeline,
         )
 
-    with gr.Blocks(title="无为AI · 方言聊天") as demo:
+    with gr.Blocks(title="无维AI · 方言聊天") as demo:
         gr.Markdown(
             """
-            # 🌿 无为AI
+            # 🌿 无维AI
             ### 专为长辈设计的方言聊天助手
             按住麦克风说话，或直接打字聊天。
             """,

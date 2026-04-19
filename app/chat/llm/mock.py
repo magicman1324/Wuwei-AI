@@ -5,7 +5,7 @@ from collections.abc import AsyncIterator
 from app.chat.llm.base import BaseLLM, LLMMessage, LLMResponse
 
 _CANNED_RESPONSES = [
-    "您好呀！我是无为，很高兴认识您。",
+    "您好呀！我是无维，很高兴认识您。",
     "您说的这件事我听到了，要不要再多说一点呢？",
     "今天过得怎么样？有什么开心的事吗？",
     "您放心，我会一直陪着您的。",

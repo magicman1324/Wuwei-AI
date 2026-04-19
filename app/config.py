@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # 应用
-    app_name: str = "无为AI"
+    app_name: str = "无维AI"
     debug: bool = False
     log_level: str = "INFO"
 

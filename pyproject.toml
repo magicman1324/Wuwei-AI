@@ -1,7 +1,7 @@
 [project]
 name = "wuwei-ai"
 version = "0.1.0"
-description = "无为AI - 面向中老年的方言语音聊天助手"
+description = "无维AI - 面向中老年的方言语音聊天助手"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
 dependencies = [

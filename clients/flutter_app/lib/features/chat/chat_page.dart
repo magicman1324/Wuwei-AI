@@ -53,9 +53,11 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('需要麦克风权限才能录音', style: TextStyle(fontSize: 18)),
+            content: Text('桌面模式暂不支持录音，请使用文字输入',
+                style: TextStyle(fontSize: 18)),
           ),
         );
+        setState(() => _showTextInput = true);
       }
       return;
     }

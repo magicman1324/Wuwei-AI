@@ -101,7 +101,7 @@ class ChatNotifier extends Notifier<ChatState> {
     } catch (e) {
       state = state.copyWith(
         isProcessing: false,
-        error: '发送失败，请检查网络',
+        error: '发送失败: $e',
       );
     }
   }

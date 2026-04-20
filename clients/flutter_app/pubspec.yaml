@@ -12,8 +12,8 @@ dependencies:
   flutter_riverpod: ^2.5.0
   dio: ^5.4.0
   web_socket_channel: ^3.0.0
-  record: ^5.1.0
-  just_audio: ^0.9.37
+  # record: ^5.1.0  # TODO: 手机调试时启用
+  # just_audio: ^0.9.37  # TODO: 手机调试时启用
   connectivity_plus: ^6.0.0
   shared_preferences: ^2.2.0
   device_info_plus: ^10.1.0

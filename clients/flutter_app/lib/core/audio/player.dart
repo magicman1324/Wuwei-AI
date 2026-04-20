@@ -1,43 +1,14 @@
 import 'dart:typed_data';
 
-import 'package:just_audio/just_audio.dart';
-
+/// 音频播放占位 — Windows 桌面调试时不可用，手机端启用 just_audio 插件后替换。
 class AudioPlayerService {
-  final AudioPlayer _player = AudioPlayer();
-
-  bool get isPlaying => _player.playing;
+  bool get isPlaying => false;
 
   Future<void> playBytes(Uint8List audioBytes, {String format = 'mp3'}) async {
-    final source = _BytesAudioSource(audioBytes, format);
-    await _player.setAudioSource(source);
-    await _player.play();
+    // Windows 桌面不支持音频播放
   }
 
-  Future<void> stop() async {
-    await _player.stop();
-  }
+  Future<void> stop() async {}
 
-  Future<void> dispose() async {
-    await _player.dispose();
-  }
-}
-
-class _BytesAudioSource extends StreamAudioSource {
-  final Uint8List _bytes;
-  final String _format;
-
-  _BytesAudioSource(this._bytes, this._format);
-
-  @override
-  Future<StreamAudioResponse> request([int? start, int? end]) async {
-    start ??= 0;
-    end ??= _bytes.length;
-    return StreamAudioResponse(
-      sourceLength: _bytes.length,
-      contentLength: end - start,
-      offset: start,
-      stream: Stream.value(_bytes.sublist(start, end)),
-      contentType: 'audio/$_format',
-    );
-  }
+  Future<void> dispose() async {}
 }

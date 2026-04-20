@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from app.chat.engine import ChatEngine
 from app.dependencies import get_chat_engine, get_speech_pipeline
 from app.dialect.adapter import DialectCode
+from app.speech.audio_convert import to_pcm16_16k
 from app.speech.pipeline import SpeechPipeline
 
 router = APIRouter()
@@ -27,20 +28,28 @@ async def voice_chat(
     audio: UploadFile = File(...),
     user_id: str = Form(""),
     dialect_hint: str = Form(""),
+    audio_format: str = Form("pcm"),
+    sample_rate: int = Form(16000),
     pipeline: SpeechPipeline = Depends(get_speech_pipeline),
     engine: ChatEngine = Depends(get_chat_engine),
 ):
     """
     语音对话接口：上传音频文件，返回文本回复 + 语音回复。
 
-    流程: ASR → 规范化 → LLM → 方言化 → TTS
+    支持 audio_format: pcm / mp3 / aac / wav / m4a
+    流程: 格式转换 → ASR → 规范化 → LLM → 方言化 → TTS
     """
     audio_data = await audio.read()
     dialect = DialectCode(dialect_hint) if dialect_hint else None
 
+    # 0. 格式转换（非 PCM 时转为 PCM16 16kHz）
+    audio_data = to_pcm16_16k(audio_data, audio_format)
+
     # 1. ASR + 规范化
     raw_text, normalized_text, detected_dialect = await pipeline.process_voice(
         audio_data=audio_data,
+        audio_format="pcm",
+        sample_rate=16000,
         user_id=user_id,
         dialect_hint=dialect,
     )

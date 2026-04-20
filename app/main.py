@@ -3,6 +3,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 
 # 导入方言适配器以触发自动注册 (必须在 api_router 之前)
@@ -43,6 +44,15 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    # CORS — 允许移动端（Flutter / 小程序）跨域访问
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     # 注册 API 路由
     app.include_router(api_router, prefix="/api/v1")
 
@@ -61,11 +71,11 @@ def create_app() -> FastAPI:
         app = gr.mount_gradio_app(
             app,
             gradio_app,
-            path="/",
+            path="/debug",
             theme=get_ui_theme(),
             css=get_ui_css() or None,
         )
-        logger.info("Gradio UI 已挂载到 /")
+        logger.info("Gradio UI 已挂载到 /debug")
     except ImportError:
         logger.warning("Gradio 未安装，跳过 UI 挂载")
 

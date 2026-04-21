@@ -1,6 +1,7 @@
 """文本对话 API。"""
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from loguru import logger
 from pydantic import BaseModel
 
 from app.chat.engine import ChatEngine
@@ -29,13 +30,17 @@ async def chat(
     engine: ChatEngine = Depends(get_chat_engine),
 ):
     """文本对话接口。"""
-    result = await engine.chat_text(
-        text=request.message,
-        user_id=request.user_id,
-        dialect=request.dialect,
-    )
-    return ChatResponse(
-        response=result.text,
-        dialect=result.dialect,
-        conversation_id=request.conversation_id,
-    )
+    try:
+        result = await engine.chat_text(
+            text=request.message,
+            user_id=request.user_id,
+            dialect=request.dialect,
+        )
+        return ChatResponse(
+            response=result.text,
+            dialect=result.dialect,
+            conversation_id=request.conversation_id,
+        )
+    except Exception as e:
+        logger.error(f"LLM 调用失败: {e}")
+        raise HTTPException(status_code=502, detail=f"LLM 调用失败: {e}")

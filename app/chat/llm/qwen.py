@@ -45,7 +45,11 @@ class QwenLLM(BaseLLM):
         }
 
         resp = await self._client.post("/chat/completions", json=payload)
-        resp.raise_for_status()
+        if resp.status_code != 200:
+            logger.error(
+                f"Qwen API 错误: status={resp.status_code}, body={resp.text}"
+            )
+            resp.raise_for_status()
         data = resp.json()
 
         choice = data["choices"][0]

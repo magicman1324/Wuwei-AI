@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_client.dart';
@@ -97,6 +98,14 @@ class ChatNotifier extends Notifier<ChatState> {
           ChatMessage(role: 'assistant', content: resp.response),
         ],
         isProcessing: false,
+      );
+    } on DioException catch (e) {
+      final detail = e.response?.data is Map
+          ? e.response!.data['detail'] ?? e.message
+          : e.message;
+      state = state.copyWith(
+        isProcessing: false,
+        error: '发送失败: $detail',
       );
     } catch (e) {
       state = state.copyWith(

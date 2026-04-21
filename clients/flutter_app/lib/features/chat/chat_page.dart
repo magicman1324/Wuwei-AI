@@ -129,16 +129,26 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       ),
       body: Column(
         children: [
+          // Debug info
+          Container(
+            width: double.infinity,
+            color: Colors.grey[100],
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Text(
+              'API: ${ApiConstants.baseUrl}',
+              style: const TextStyle(fontSize: 12, color: Colors.black54),
+            ),
+          ),
+
           // Error banner
           if (chat.error != null)
             Container(
               width: double.infinity,
               color: Colors.red[50],
               padding: const EdgeInsets.all(12),
-              child: Text(
+              child: SelectableText(
                 chat.error!,
-                style: const TextStyle(fontSize: 18, color: Colors.red),
-                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 14, color: Colors.red),
               ),
             ),
 

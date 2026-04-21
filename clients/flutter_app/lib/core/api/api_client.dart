@@ -1,27 +1,89 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 
 import '../constants.dart';
 import 'models/chat_models.dart';
 import 'models/user_models.dart';
 
+/// 文件日志：Windows 调试通道失败时也能看到 Dio 的请求/响应。
+class _FileLogger {
+  static File? _file;
+  static bool _initialized = false;
+
+  static void _init() {
+    if (_initialized) return;
+    _initialized = true;
+    try {
+      _file = File('${Directory.current.path}${Platform.pathSeparator}dio_debug.log');
+      _file!.writeAsStringSync(
+        '\n=== Session: ${DateTime.now()} | baseUrl=${ApiConstants.baseUrl} ===\n',
+        mode: FileMode.append,
+      );
+    } catch (e) {
+      print('[DIO-LOG] init failed: $e');
+    }
+  }
+
+  static void log(Object msg) {
+    _init();
+    final line = '[${DateTime.now()}] $msg';
+    print(line);
+    try {
+      _file?.writeAsStringSync('$line\n', mode: FileMode.append);
+    } catch (_) {}
+  }
+}
+
 class ApiClient {
   late final Dio _dio;
 
   ApiClient({String? baseUrl}) {
+    _FileLogger.log('ApiClient init baseUrl=${baseUrl ?? ApiConstants.baseUrl}');
+
     _dio = Dio(BaseOptions(
       baseUrl: baseUrl ?? ApiConstants.baseUrl,
       connectTimeout: ApiConstants.timeout,
       receiveTimeout: ApiConstants.timeout,
+      sendTimeout: ApiConstants.timeout,
+      contentType: 'application/json',
+      responseType: ResponseType.json,
     ));
-    _dio.interceptors.add(LogInterceptor(
-      requestHeader: false,
-      responseHeader: false,
-      requestBody: true,
-      responseBody: true,
-      logPrint: (o) => print('[DIO] $o'),
+
+    // 关键：强制绕过 Windows 系统代理（Dart HttpClient 默认会走 WinHTTP 代理）
+    _dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        client.findProxy = (uri) {
+          _FileLogger.log('findProxy($uri) -> DIRECT');
+          return 'DIRECT';
+        };
+        client.badCertificateCallback = (cert, host, port) => true;
+        return client;
+      },
+    );
+
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) {
+        _FileLogger.log('→ ${options.method} ${options.uri}');
+        _FileLogger.log('  body=${options.data}');
+        handler.next(options);
+      },
+      onResponse: (response, handler) {
+        _FileLogger.log('← ${response.statusCode} ${response.requestOptions.uri}');
+        _FileLogger.log('  data=${response.data}');
+        handler.next(response);
+      },
+      onError: (err, handler) {
+        _FileLogger.log('✗ ${err.type} ${err.requestOptions.uri}');
+        _FileLogger.log('  status=${err.response?.statusCode}');
+        _FileLogger.log('  response=${err.response?.data}');
+        _FileLogger.log('  message=${err.message}');
+        handler.next(err);
+      },
     ));
   }
 
@@ -99,4 +161,19 @@ class ApiClient {
       String userId, String conversationId) async {
     await _dio.delete('/conversations/$userId/$conversationId');
   }
+}
+
+/// 用于从 UI 访问日志。
+String get debugLogPath =>
+    '${Directory.current.path}${Platform.pathSeparator}dio_debug.log';
+
+/// 不确定编码下简单使用：dio 返回的 data 可能是 String 或 Map。
+String formatDioError(DioException e) {
+  final uri = e.requestOptions.uri.toString();
+  final status = e.response?.statusCode;
+  final data = e.response?.data;
+  final body = data is Map
+      ? (data['detail']?.toString() ?? jsonEncode(data))
+      : data?.toString() ?? e.message ?? 'unknown';
+  return '[$status] $uri\n$body';
 }

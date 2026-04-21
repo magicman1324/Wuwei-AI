@@ -100,12 +100,9 @@ class ChatNotifier extends Notifier<ChatState> {
         isProcessing: false,
       );
     } on DioException catch (e) {
-      final detail = e.response?.data is Map
-          ? e.response!.data['detail'] ?? e.message
-          : e.message;
       state = state.copyWith(
         isProcessing: false,
-        error: '发送失败: $detail',
+        error: '发送失败:\n${formatDioError(e)}',
       );
     } catch (e) {
       state = state.copyWith(

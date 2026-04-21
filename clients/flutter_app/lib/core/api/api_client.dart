@@ -16,6 +16,13 @@ class ApiClient {
       connectTimeout: ApiConstants.timeout,
       receiveTimeout: ApiConstants.timeout,
     ));
+    _dio.interceptors.add(LogInterceptor(
+      requestHeader: false,
+      responseHeader: false,
+      requestBody: true,
+      responseBody: true,
+      logPrint: (o) => print('[DIO] $o'),
+    ));
   }
 
   // ── Health ──

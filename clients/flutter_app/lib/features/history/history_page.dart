@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 import '../../core/api/models/user_models.dart';
 import '../chat/chat_provider.dart';
+import '../user/user_provider.dart';
 
 class HistoryPage extends ConsumerStatefulWidget {
   const HistoryPage({super.key});
@@ -30,8 +31,16 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     });
 
     try {
+      final userId = ref.read(userProvider).valueOrNull?.id;
+      if (userId == null) {
+        setState(() {
+          _error = '用户尚未初始化';
+          _loading = false;
+        });
+        return;
+      }
       final api = ref.read(apiClientProvider);
-      final list = await api.listConversations('anonymous');
+      final list = await api.listConversations(userId);
       setState(() {
         _conversations = list;
         _loading = false;

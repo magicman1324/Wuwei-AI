@@ -7,6 +7,7 @@ import '../../core/audio/player.dart';
 import '../../core/audio/recorder.dart';
 import '../../core/constants.dart';
 import '../../shared/widgets/dialect_picker.dart';
+import '../user/user_provider.dart';
 import 'chat_provider.dart';
 import 'widgets/chat_bubble.dart';
 import 'widgets/mic_button.dart';
@@ -83,7 +84,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       offset += chunk.length;
     }
 
-    final userId = 'anonymous'; // TODO: from local storage
+    final userId = ref.read(userProvider).valueOrNull?.id;
+    if (userId == null) return;
     final audioBytes =
         await ref.read(chatProvider.notifier).sendVoice(combined, userId);
 
@@ -107,7 +109,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     if (text.isEmpty) return;
 
     _textController.clear();
-    final userId = 'anonymous';
+    final userId = ref.read(userProvider).valueOrNull?.id;
+    if (userId == null) return;
     await ref.read(chatProvider.notifier).sendText(text, userId);
     _scrollToBottom();
   }
@@ -115,6 +118,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   @override
   Widget build(BuildContext context) {
     final chat = ref.watch(chatProvider);
+    final user = ref.watch(userProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -135,10 +139,23 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             color: Colors.grey[100],
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             child: Text(
-              'API: ${ApiConstants.baseUrl}',
+              'API: ${ApiConstants.baseUrl}  |  '
+              'User: ${user.valueOrNull?.id.substring(0, 8) ?? (user.isLoading ? "loading..." : "-")}',
               style: const TextStyle(fontSize: 12, color: Colors.black54),
             ),
           ),
+
+          // User init error
+          if (user.hasError)
+            Container(
+              width: double.infinity,
+              color: Colors.orange[50],
+              padding: const EdgeInsets.all(12),
+              child: SelectableText(
+                '用户初始化失败：${user.error}',
+                style: const TextStyle(fontSize: 14, color: Colors.orange),
+              ),
+            ),
 
           // Error banner
           if (chat.error != null)

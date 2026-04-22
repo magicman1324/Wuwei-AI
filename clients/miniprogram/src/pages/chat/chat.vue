@@ -1,7 +1,17 @@
 <template>
   <view class="chat-page">
-    <!-- 错误横幅 -->
-    <view v-if="chatStore.error" class="error-banner" @tap="chatStore.clearError">
+    <!-- 用户初始化中 -->
+    <view v-if="userStore.loading" class="init-banner">
+      正在初始化...
+    </view>
+
+    <!-- 用户初始化失败 -->
+    <view v-else-if="userStore.error" class="error-banner" @tap="retryInit">
+      {{ userStore.error }}（点击重试）
+    </view>
+
+    <!-- 聊天错误 -->
+    <view v-else-if="chatStore.error" class="error-banner" @tap="chatStore.clearError">
       {{ chatStore.error }}（点击关闭）
     </view>
 
@@ -35,7 +45,7 @@
         <view v-if="chatStore.isProcessing" class="processing-hint">正在处理...</view>
         <view
           class="mic-btn"
-          :class="{ recording: chatStore.isRecording, disabled: chatStore.isProcessing }"
+          :class="{ recording: chatStore.isRecording, disabled: chatStore.isProcessing || userStore.loading || !userStore.user }"
           @longpress="onMicStart"
           @touchend="onMicStop"
           @touchcancel="onMicCancel"
@@ -57,7 +67,7 @@
         />
         <view
           class="send-btn"
-          :class="{ disabled: chatStore.isProcessing || !inputText.trim() }"
+          :class="{ disabled: chatStore.isProcessing || !inputText.trim() || userStore.loading || !userStore.user }"
           @tap="onSendText"
         >
           发送
@@ -73,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, onMounted } from 'vue'
 import { useChatStore } from '../../store/chat'
 import { useUserStore } from '../../store/user'
 
@@ -83,6 +93,17 @@ const userStore = useUserStore()
 const inputText = ref('')
 const showTextInput = ref(false)
 const scrollTarget = ref('')
+
+function retryInit() {
+  userStore.init()
+}
+
+// 如果进页面时用户还没初始化，等待初始化完成
+onMounted(() => {
+  if (!userStore.user && !userStore.loading) {
+    userStore.init()
+  }
+})
 
 // 录音管理器
 const recorderManager = uni.getRecorderManager()
@@ -227,6 +248,14 @@ async function onSendText() {
   display: flex;
   flex-direction: column;
   height: 100vh;
+}
+
+.init-banner {
+  background: #E8F5E9;
+  color: #2E7D32;
+  font-size: 30rpx;
+  padding: 16rpx 24rpx;
+  text-align: center;
 }
 
 .error-banner {

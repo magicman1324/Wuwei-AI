@@ -73,6 +73,10 @@ class ChatNotifier extends Notifier<ChatState> {
     state = state.copyWith(isPlaying: v);
   }
 
+  void setError(String msg) {
+    state = state.copyWith(error: msg);
+  }
+
   Future<void> sendText(String text, String userId) async {
     if (text.trim().isEmpty) return;
 

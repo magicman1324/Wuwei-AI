@@ -85,7 +85,11 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     }
 
     final userId = ref.read(userProvider).valueOrNull?.id;
-    if (userId == null) return;
+    if (userId == null) {
+      ref.read(chatProvider.notifier).setError('用户尚未初始化，请等待或重启应用');
+      ref.invalidate(userProvider);
+      return;
+    }
     final audioBytes =
         await ref.read(chatProvider.notifier).sendVoice(combined, userId);
 
@@ -110,7 +114,11 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
     _textController.clear();
     final userId = ref.read(userProvider).valueOrNull?.id;
-    if (userId == null) return;
+    if (userId == null) {
+      ref.read(chatProvider.notifier).setError('用户尚未初始化，请等待或重启应用');
+      ref.invalidate(userProvider);
+      return;
+    }
     await ref.read(chatProvider.notifier).sendText(text, userId);
     _scrollToBottom();
   }
@@ -146,14 +154,24 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           ),
 
           // User init error
-          if (user.hasError)
+          if (user.hasError || (!user.isLoading && user.valueOrNull == null))
             Container(
               width: double.infinity,
               color: Colors.orange[50],
               padding: const EdgeInsets.all(12),
-              child: SelectableText(
-                '用户初始化失败：${user.error}',
-                style: const TextStyle(fontSize: 14, color: Colors.orange),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SelectableText(
+                      '用户初始化失败：${user.error ?? "未知错误"}',
+                      style: const TextStyle(fontSize: 14, color: Colors.orange),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => ref.invalidate(userProvider),
+                    child: const Text('重试'),
+                  ),
+                ],
               ),
             ),
 

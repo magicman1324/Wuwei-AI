@@ -1,0 +1,24 @@
+{
+  "name": "无维AI",
+  "appid": "",
+  "description": "面向中老年的方言语音聊天助手",
+  "versionName": "0.1.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "mp-weixin": {
+    "appid": "",
+    "setting": {
+      "urlCheck": false,
+      "es6": true,
+      "postcss": true,
+      "minified": true
+    },
+    "usingComponents": true,
+    "permission": {
+      "scope.record": {
+        "desc": "用于语音对话，识别您说的方言"
+      }
+    },
+    "requiredPrivateInfos": []
+  }
+}

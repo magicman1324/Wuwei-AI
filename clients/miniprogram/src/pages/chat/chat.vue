@@ -86,6 +86,7 @@
 import { ref, watch, nextTick, onMounted } from 'vue'
 import { useChatStore } from '../../store/chat'
 import { useUserStore } from '../../store/user'
+import { BASE_URL } from '../../utils/config'
 
 const chatStore = useChatStore()
 const userStore = useUserStore()
@@ -182,7 +183,7 @@ async function sendVoice() {
   try {
     const res: any = await new Promise((resolve, reject) => {
       uni.uploadFile({
-        url: `http://127.0.0.1:8000/api/v1/voice`,
+        url: `${BASE_URL}/voice`,
         filePath: tempFilePath,
         name: 'audio',
         formData: {

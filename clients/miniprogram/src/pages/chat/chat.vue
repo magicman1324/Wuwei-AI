@@ -118,9 +118,20 @@ recorderManager.onStop((res: any) => {
   }
 })
 
-recorderManager.onError(() => {
+recorderManager.onError((err: any) => {
   chatStore.isRecording = false
-  chatStore.error = '录音失败，请检查麦克风权限'
+  // 引导用户去小程序设置页开启麦克风
+  uni.showModal({
+    title: '需要麦克风权限',
+    content: '请点击"前往设置"，在小程序权限中开启麦克风',
+    confirmText: '前往设置',
+    cancelText: '取消',
+    success: (res) => {
+      if (res.confirm) {
+        uni.openSetting({ success: () => {} })
+      }
+    },
+  })
 })
 
 watch(
@@ -135,20 +146,14 @@ watch(
 function onMicStart() {
   if (chatStore.isProcessing) return
 
-  uni.authorize({
-    scope: 'scope.record',
-    success: () => {
-      chatStore.isRecording = true
-      recorderManager.start({
-        duration: 60000,
-        sampleRate: 16000,
-        numberOfChannels: 1,
-        format: 'mp3',
-      })
-    },
-    fail: () => {
-      chatStore.error = '请在设置中允许录音权限'
-    },
+  // 先尝试直接开始录音，让微信自动弹出授权对话框
+  // 如果之前拒绝过，引导用户去小程序设置页手动开启
+  chatStore.isRecording = true
+  recorderManager.start({
+    duration: 60000,
+    sampleRate: 16000,
+    numberOfChannels: 1,
+    format: 'mp3',
   })
 }
 

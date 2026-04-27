@@ -2,7 +2,7 @@
 // 模拟器开发：       env = 'local'
 // 真机调试(ngrok)：  env = 'tunnel'，填入 ngrok 给的域名
 // 正式部署：         env = 'prod'，填入服务器域名
-const env: 'local' | 'tunnel' | 'prod' = 'local'
+const env: 'local' | 'tunnel' | 'prod' = 'tunnel'
 
 const HOSTS: Record<typeof env, { http: string; ws: string }> = {
   local: {
@@ -12,8 +12,8 @@ const HOSTS: Record<typeof env, { http: string; ws: string }> = {
   tunnel: {
     // ngrok/cpolar 隧道地址（真机调试用）
     // 运行 ngrok http 8000 后把域名填到这里
-    http: 'https://YOUR-TUNNEL.ngrok-free.app',
-    ws: 'wss://YOUR-TUNNEL.ngrok-free.app',
+    http: 'https://6aea5cad.r20.vip.cpolar.cn',
+    ws: 'wss://6aea5cad.r20.vip.cpolar.cn',
   },
   prod: {
     http: 'https://your-server.com',

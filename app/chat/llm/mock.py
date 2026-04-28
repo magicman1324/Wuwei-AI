@@ -18,7 +18,7 @@ class MockLLM(BaseLLM):
 
     provider_name = "mock"
 
-    def __init__(self, api_key: str = "", model: str = "mock-v1"):
+    def __init__(self, api_key: str = "", model: str = "mock-v1", **_ignored):
         self.api_key = api_key
         self.model = model
         self._counter = 0

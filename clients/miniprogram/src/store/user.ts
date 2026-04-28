@@ -30,27 +30,34 @@ export const useUserStore = defineStore('user', () => {
   async function init() {
     loading.value = true
     error.value = null
+    console.log('[user] init start')
 
     try {
       const userId = getUserId()
       if (userId) {
         try {
+          console.log('[user] try getUser', userId)
           user.value = await getUser(userId)
+          console.log('[user] getUser ok', user.value)
           return
-        } catch {
+        } catch (e: any) {
+          console.warn('[user] getUser failed, will recreate', e?.message)
           uni.removeStorageSync('user_id')
         }
       }
 
       const deviceId = getDeviceId()
       const dialect = (uni.getStorageSync('dialect_preference') as string) || 'cmn'
+      console.log('[user] createUser', { deviceId, dialect })
       user.value = await createUser({
         device_id: deviceId,
         dialect_preference: dialect,
       })
+      console.log('[user] createUser ok', user.value)
       uni.setStorageSync('user_id', user.value.id)
     } catch (e: any) {
-      error.value = e.message || '用户初始化失败'
+      console.error('[user] init failed', e)
+      error.value = e?.message || '用户初始化失败'
     } finally {
       loading.value = false
     }

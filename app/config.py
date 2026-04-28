@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     llm_api_key: str = ""
     llm_model: str = "qwen-max"
     llm_base_url: str = ""
+    llm_enable_search: bool = False  # DashScope 内置联网搜索（仅 qwen 闭源模型支持）
 
     # 科大讯飞
     iflytek_app_id: str = ""

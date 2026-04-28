@@ -2,7 +2,7 @@
 // 模拟器开发：       env = 'local'
 // 真机调试(ngrok)：  env = 'tunnel'，填入 ngrok 给的域名
 // 正式部署：         env = 'prod'，填入服务器域名
-const env: 'local' | 'tunnel' | 'prod' = 'tunnel'
+const env: 'local' | 'tunnel' | 'prod' = 'local'
 
 const HOSTS: Record<typeof env, { http: string; ws: string }> = {
   local: {

@@ -45,7 +45,12 @@ def get_llm():
     provider = s.llm_provider
     if provider != "mock" and not s.llm_api_key:
         provider = "mock"
-    return LLMFactory.create(provider, api_key=s.llm_api_key, model=s.llm_model)
+    return LLMFactory.create(
+        provider,
+        api_key=s.llm_api_key,
+        model=s.llm_model,
+        enable_search=s.llm_enable_search,
+    )
 
 
 @lru_cache

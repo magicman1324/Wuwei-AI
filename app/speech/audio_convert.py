@@ -16,9 +16,14 @@ def to_pcm16_16k(audio_bytes: bytes, src_format: str) -> bytes:
 
     try:
         from pydub import AudioSegment
+        from pydub.exceptions import CouldntDecodeError
     except ImportError as e:
         raise RuntimeError("pydub 未安装，无法转换音频格式") from e
 
-    seg = AudioSegment.from_file(io.BytesIO(audio_bytes), format=fmt)
+    # 微信开发者工具模拟器录的"mp3"实际不是合法 mp3 帧，需要让 ffmpeg 自己嗅探
+    try:
+        seg = AudioSegment.from_file(io.BytesIO(audio_bytes), format=fmt)
+    except CouldntDecodeError:
+        seg = AudioSegment.from_file(io.BytesIO(audio_bytes))
     seg = seg.set_frame_rate(16000).set_channels(1).set_sample_width(2)
     return seg.raw_data

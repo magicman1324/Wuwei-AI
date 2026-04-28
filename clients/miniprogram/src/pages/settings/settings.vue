@@ -157,28 +157,39 @@ async function save() {
 </script>
 
 <style lang="scss" scoped>
+$bg: #0E1116;
+$bg2: #161A20;
+$bg3: #1E232A;
+$fg: #ECE7DD;
+$fg-dim: #8C857B;
+$fg-dimmer: #4A4540;
+$accent: #4FB58F;
+
 .settings-page {
-  padding: 24rpx;
+  padding: 32rpx 24rpx;
   min-height: 100vh;
-  background: #F5F5F5;
+  background: $bg;
+  color: $fg;
 }
 
 .section {
-  margin-bottom: 32rpx;
+  margin-bottom: 36rpx;
 }
 
 .section-title {
-  font-size: 30rpx;
-  color: #666;
-  margin-bottom: 12rpx;
+  font-size: 22rpx;
+  color: $fg-dim;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 16rpx;
   padding-left: 8rpx;
 }
 
 .card {
-  background: #FFFFFF;
+  background: $bg2;
+  border: 1rpx solid $bg3;
   border-radius: 16rpx;
   padding: 24rpx 32rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
 }
 
 .row {
@@ -186,45 +197,46 @@ async function save() {
   justify-content: space-between;
   align-items: center;
   padding: 16rpx 0;
-  border-bottom: 1rpx solid #F5F5F5;
+  border-bottom: 1rpx solid $bg3;
 
   &:last-child { border-bottom: none; }
 }
 
 .label {
-  font-size: 34rpx;
-  color: #333;
+  font-size: 28rpx;
+  color: $fg;
 }
 
 .value {
-  font-size: 32rpx;
-  color: #999;
+  font-size: 26rpx;
+  color: $fg-dim;
 }
 
 .radio-row {
   display: flex;
   align-items: center;
   padding: 20rpx 0;
-  border-bottom: 1rpx solid #F5F5F5;
+  border-bottom: 1rpx solid $bg3;
 
   &:last-child { border-bottom: none; }
 }
 
 .radio-dot {
-  width: 40rpx;
-  height: 40rpx;
+  width: 32rpx;
+  height: 32rpx;
   border-radius: 50%;
-  border: 4rpx solid #BDBDBD;
+  border: 2rpx solid $fg-dimmer;
   margin-right: 20rpx;
 
   &.active {
-    border-color: #2E7D32;
-    background: #2E7D32;
+    border-color: $accent;
+    background: $accent;
   }
 }
 
 .radio-label {
-  font-size: 36rpx;
+  font-size: 30rpx;
+  color: $fg;
 }
 
 .slider-row {
@@ -237,8 +249,8 @@ async function save() {
   .slider-value {
     width: 80rpx;
     text-align: right;
-    font-size: 28rpx;
-    color: #666;
+    font-size: 24rpx;
+    color: $fg-dim;
   }
 }
 
@@ -249,44 +261,44 @@ async function save() {
 
 .font-btn {
   flex: 1;
-  height: 80rpx;
+  height: 76rpx;
   border-radius: 12rpx;
-  border: 2rpx solid #E0E0E0;
+  border: 1rpx solid $bg3;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32rpx;
-  color: #666;
+  font-size: 28rpx;
+  color: $fg-dim;
 
   &.active {
-    border-color: #2E7D32;
-    background: #E8F5E9;
-    color: #2E7D32;
-    font-weight: 600;
+    border-color: $accent;
+    color: $accent;
   }
 }
 
 .save-btn {
   margin-top: 40rpx;
-  height: 96rpx;
-  background: #2E7D32;
-  color: #FFFFFF;
-  font-size: 36rpx;
+  height: 88rpx;
+  background: transparent;
+  color: $accent;
+  border: 1rpx solid $accent;
+  font-size: 28rpx;
+  letter-spacing: 0.2em;
   border-radius: 16rpx;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  &.disabled { background: #BDBDBD; }
-  &:active { background: #1B5E20; }
+  &.disabled { color: $fg-dimmer; border-color: $bg3; }
+  &:active { background: rgba(79, 181, 143, 0.1); }
 }
 
 .message {
   text-align: center;
-  font-size: 30rpx;
+  font-size: 26rpx;
   margin-top: 20rpx;
 
-  &.success { color: #2E7D32; }
-  &.error { color: #D32F2F; }
+  &.success { color: $accent; }
+  &.error { color: #E89A92; }
 }
 </style>

@@ -81,26 +81,29 @@ function goDetail(id: string) {
 
 <style lang="scss" scoped>
 .history-page {
-  padding: 24rpx;
+  padding: 32rpx 24rpx;
   min-height: 100vh;
-  background: #F5F5F5;
+  background: #0E1116;
+  color: #ECE7DD;
 }
 
 .loading, .error, .empty {
   text-align: center;
-  color: #999;
-  font-size: 36rpx;
+  color: #8C857B;
+  font-size: 30rpx;
   margin-top: 200rpx;
+  font-family: 'Songti SC', 'Noto Serif SC', serif;
+  font-style: italic;
 }
 
-.error { color: #E65100; }
+.error { color: #E89A92; }
 
 .conv-item {
-  background: #FFFFFF;
+  background: #161A20;
+  border: 1rpx solid #1E232A;
   border-radius: 16rpx;
   padding: 28rpx 32rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  margin-bottom: 16rpx;
 }
 
 .conv-header {
@@ -110,19 +113,21 @@ function goDetail(id: string) {
 }
 
 .conv-dialect {
-  font-size: 34rpx;
-  font-weight: 600;
-  color: #2E7D32;
+  font-size: 30rpx;
+  font-weight: 400;
+  color: #4FB58F;
+  letter-spacing: 0.05em;
 }
 
 .conv-count {
-  font-size: 28rpx;
-  color: #999;
+  font-size: 24rpx;
+  color: #8C857B;
 }
 
 .conv-time {
-  font-size: 26rpx;
-  color: #BDBDBD;
+  font-size: 22rpx;
+  color: #4A4540;
   margin-top: 8rpx;
+  letter-spacing: 0.1em;
 }
 </style>

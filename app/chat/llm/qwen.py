@@ -21,10 +21,12 @@ class QwenLLM(BaseLLM):
         api_key: str,
         model: str = "qwen-max",
         base_url: str = "",
+        enable_search: bool = False,
     ):
         self.api_key = api_key
         self.model = model
         self.base_url = base_url or _DEFAULT_BASE_URL
+        self.enable_search = enable_search
         self._client = httpx.AsyncClient(
             base_url=self.base_url,
             headers={"Authorization": f"Bearer {self.api_key}"},
@@ -43,9 +45,15 @@ class QwenLLM(BaseLLM):
             "temperature": temperature,
             "max_tokens": max_tokens,
         }
+        if self.enable_search:
+            payload["enable_search"] = True
 
         resp = await self._client.post("/chat/completions", json=payload)
-        resp.raise_for_status()
+        if resp.status_code != 200:
+            logger.error(
+                f"Qwen API 错误: status={resp.status_code}, body={resp.text}"
+            )
+            resp.raise_for_status()
         data = resp.json()
 
         choice = data["choices"][0]
@@ -69,6 +77,8 @@ class QwenLLM(BaseLLM):
             "max_tokens": max_tokens,
             "stream": True,
         }
+        if self.enable_search:
+            payload["enable_search"] = True
 
         async with self._client.stream("POST", "/chat/completions", json=payload) as resp:
             resp.raise_for_status()

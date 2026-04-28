@@ -1,0 +1,42 @@
+{
+  "pages": [
+    { "path": "pages/chat/chat", "style": { "navigationStyle": "custom", "navigationBarTitleText": "无维" } },
+    { "path": "pages/history/history", "style": { "navigationBarTitleText": "对话历史" } },
+    { "path": "pages/settings/settings", "style": { "navigationBarTitleText": "设置" } }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "无维",
+    "navigationBarBackgroundColor": "#0E1116",
+    "backgroundColor": "#0E1116",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#8C857B",
+    "selectedColor": "#4FB58F",
+    "borderStyle": "black",
+    "backgroundColor": "#0E1116",
+    "height": "72px",
+    "fontSize": "12px",
+    "list": [
+      {
+        "pagePath": "pages/chat/chat",
+        "text": "对话",
+        "iconPath": "static/tab-chat.png",
+        "selectedIconPath": "static/tab-chat-active.png"
+      },
+      {
+        "pagePath": "pages/history/history",
+        "text": "历史",
+        "iconPath": "static/tab-history.png",
+        "selectedIconPath": "static/tab-history-active.png"
+      },
+      {
+        "pagePath": "pages/settings/settings",
+        "text": "设置",
+        "iconPath": "static/tab-settings.png",
+        "selectedIconPath": "static/tab-settings-active.png"
+      }
+    ]
+  }
+}

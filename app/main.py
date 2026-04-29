@@ -26,10 +26,26 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"数据库初始化失败: {e}")
 
+    # 启动：老年电台定时任务
+    radio_stop = None
+    try:
+        from app.radio.scheduler import start_scheduler, stop_scheduler
+
+        start_scheduler()
+        radio_stop = stop_scheduler
+    except Exception as e:
+        logger.warning(f"老年电台定时任务启动失败: {e}")
+
     logger.info(f"{settings.app_name} 启动完成")
     logger.info(f"已启用方言: {settings.enabled_dialects}")
 
     yield
+
+    if radio_stop:
+        try:
+            radio_stop()
+        except Exception:
+            pass
 
     logger.info(f"{settings.app_name} 已关闭")
 

@@ -47,6 +47,23 @@ class Conversation(SQLModel, table=True):
     ended_at: Optional[datetime] = None
 
 
+class RadioEpisode(SQLModel, table=True):
+    """老年电台节目：每日每方言每分类一期。"""
+    __tablename__ = "radio_episodes"
+
+    id: str = Field(default_factory=_uuid, primary_key=True)
+    date: str = Field(index=True)               # ISO 日期 'YYYY-MM-DD'
+    category: str = Field(index=True)           # 'health' | 'nostalgia'
+    subtopic: Optional[str] = None              # 怀旧细分: 'old_life' | 'opera'
+    dialect: str = Field(default="cmn", index=True)
+    title: str
+    text: str                                   # 全文文稿
+    audio_path: Optional[str] = None            # 服务器本地路径（相对 data/radio/）
+    duration_ms: int = Field(default=0)
+    status: str = Field(default="ready")        # 'ready' | 'failed' | 'pending'
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
 class Message(SQLModel, table=True):
     __tablename__ = "messages"
 

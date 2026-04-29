@@ -1,4 +1,5 @@
 import { request } from './request'
+import { BASE_URL } from '../utils/config'
 
 // ── Health ──
 
@@ -142,4 +143,38 @@ export function getConversation(userId: string, conversationId: string) {
 
 export function deleteConversation(userId: string, conversationId: string) {
   return request({ url: `/conversations/${userId}/${conversationId}`, method: 'DELETE' })
+}
+
+// ── Radio (老年电台) ──
+
+export interface RadioEpisode {
+  id: string
+  date: string
+  category: 'health' | 'nostalgia' | string
+  subtopic: string | null
+  dialect: string
+  title: string
+  text: string
+  audio_url: string | null
+  duration_ms: number
+  status: string
+  created_at: string
+}
+
+export function getRadioToday(dialect = 'cmn') {
+  return request<RadioEpisode[]>({ url: `/radio/today?dialect=${dialect}` })
+}
+
+export function listRadioEpisodes(days = 14, dialect = 'cmn') {
+  return request<RadioEpisode[]>({
+    url: `/radio/episodes?days=${days}&dialect=${dialect}`,
+  })
+}
+
+export function getRadioEpisode(id: string) {
+  return request<RadioEpisode>({ url: `/radio/episodes/${id}` })
+}
+
+export function radioAudioUrl(id: string): string {
+  return `${BASE_URL}/radio/audio/${id}`
 }

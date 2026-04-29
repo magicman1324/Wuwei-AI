@@ -46,7 +46,7 @@
           <view class="dot" />
           <view class="dot" />
         </view>
-        <text class="think-label">思考中…</text>
+        <text class="think-label">{{ thinkPhrase }}</text>
       </view>
 
       <!-- responding: 大字号 AI 回复（带打字机） -->
@@ -103,14 +103,14 @@
       </text>
     </view>
 
-    <!-- 底栏：历史 chips + 输入框 -->
+    <!-- 底栏：电台入口 + 历史 chips + 输入框 -->
     <view class="bottom-bar">
       <scroll-view
-        v-if="historyChips.length > 0"
         class="chip-row"
         scroll-x
         :show-scrollbar="false"
       >
+        <view class="chip chip-radio" @tap="goRadio">电台 · 今日两期</view>
         <view
           v-for="(item, i) in historyChips"
           :key="i"
@@ -171,6 +171,34 @@ const canSend = computed(() =>
   !chatStore.isRecording
 )
 
+// 等待期方言安抚语：按方言随机抽词、4 秒换一句
+const THINK_PHRASES: Record<string, string[]> = {
+  cmn: [
+    '正在努力想呢…',
+    '稍等我想想…',
+    '让我捋一捋…',
+    '马上就好…',
+  ],
+  yue: [
+    '等等啊，我谂紧…',
+    '畀啲时间我啦…',
+    '做紧嘢，唔使急…',
+    '即刻就嚟…',
+  ],
+  'cmn-sichuan': [
+    '莫慌嘛，我想哈儿…',
+    '等哈嘛，马上就来…',
+    '让我捋哈儿…',
+    '一哈儿就好…',
+  ],
+}
+function pickPhrase(dialect: string): string {
+  const pool = THINK_PHRASES[dialect] || THINK_PHRASES.cmn
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+const thinkPhrase = ref('正在努力想呢…')
+let thinkTimer: any = null
+
 // 派生 UI 状态机
 const uiState = computed<'idle' | 'listening' | 'thinking' | 'responding'>(() => {
   if (chatStore.isRecording) return 'listening'
@@ -221,6 +249,21 @@ const respFontClass = computed(() => {
   return len > 60 ? 'resp-text-sm' : 'resp-text-lg'
 })
 
+// 监听思考态：进入时立刻挑一句，每 4 秒换一句；离开时清掉计时器
+watch(uiState, (s) => {
+  if (s === 'thinking') {
+    const dialect = userStore.user?.dialect_preference || 'cmn'
+    thinkPhrase.value = pickPhrase(dialect)
+    if (thinkTimer) clearInterval(thinkTimer)
+    thinkTimer = setInterval(() => {
+      thinkPhrase.value = pickPhrase(dialect)
+    }, 4000)
+  } else if (thinkTimer) {
+    clearInterval(thinkTimer)
+    thinkTimer = null
+  }
+})
+
 // 兜底打字机：只在没有 TTS 音频时（讯飞失败）按时间推进
 watch(latestAssistant, (text) => {
   if (typeTimer) clearInterval(typeTimer)
@@ -256,6 +299,10 @@ function recallHistory(item: { q: string; idx: number }) {
     typingDone.value = true
     dismissed.value = false
   }
+}
+
+function goRadio() {
+  uni.navigateTo({ url: '/pages/radio/radio' })
 }
 
 // ── 用户初始化 ───────────────────────────────────────────────────────────
@@ -310,6 +357,8 @@ recorderManager.onStop((res: any) => {
       tempFilePath = ''
       return
     }
+    // 触觉反馈：录音结束、开始处理
+    uni.vibrateShort?.({ type: 'medium' as any })
     sendVoice()
   }
 })
@@ -338,6 +387,8 @@ function onMicTouchStart() {
   recordStartedAt = Date.now()
   chatStore.isRecording = true
   console.log('[mic] start recording')
+  // 触觉反馈：录音开始
+  uni.vibrateShort?.({ type: 'light' as any })
   recorderManager.start({
     duration: 60000,
     sampleRate: 16000,
@@ -417,6 +468,8 @@ async function sendVoice() {
       { role: 'assistant', content: reply || '我没听清楚，能再说一遍吗？' } as ChatMessage,
     )
     dismissed.value = false
+    // 触觉反馈：收到回复
+    uni.vibrateShort?.({ type: 'light' as any })
 
     if (res.audio_base64) playTtsAudio(res.audio_base64, reply || '我没听清楚，能再说一遍吗？')
   } catch (e: any) {
@@ -476,7 +529,14 @@ async function onSendText() {
   const userId = userStore.user!.id
   inputText.value = ''
   dismissed.value = false
-  await chatStore.sendText(text, userId)
+  const ok = await chatStore.sendText(text, userId)
+  if (ok) {
+    // 触觉反馈：收到回复
+    uni.vibrateShort?.({ type: 'light' as any })
+  } else {
+    // 失败：把文字还回输入框，方便重试
+    inputText.value = text
+  }
 }
 </script>
 
@@ -735,6 +795,11 @@ $sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans
   max-width: 360rpx;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.chip-radio {
+  border-color: $accent;
+  color: $accent;
+  letter-spacing: 0.1em;
 }
 
 .input-row {

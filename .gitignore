@@ -11,7 +11,9 @@ build/
 
 data/db/
 data/audio/
+data/radio/
 logs/
+*.log
 
 .pytest_cache/
 .mypy_cache/

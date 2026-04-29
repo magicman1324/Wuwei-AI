@@ -2,7 +2,9 @@
   "pages": [
     { "path": "pages/chat/chat", "style": { "navigationStyle": "custom", "navigationBarTitleText": "无维" } },
     { "path": "pages/history/history", "style": { "navigationBarTitleText": "对话历史" } },
-    { "path": "pages/settings/settings", "style": { "navigationBarTitleText": "设置" } }
+    { "path": "pages/settings/settings", "style": { "navigationBarTitleText": "设置" } },
+    { "path": "pages/radio/radio", "style": { "navigationBarTitleText": "电台", "enablePullDownRefresh": true } },
+    { "path": "pages/radio/episode", "style": { "navigationBarTitleText": "节目" } }
   ],
   "globalStyle": {
     "navigationBarTextStyle": "white",

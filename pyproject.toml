@@ -17,6 +17,7 @@ dependencies = [
     "websockets>=13.0",
     "alembic>=1.18.4",
     "pydub>=0.25.1",
+    "apscheduler>=3.10.4",
 ]
 
 [project.optional-dependencies]

@@ -60,6 +60,16 @@ class SpeechPipeline:
             )
             logger.info("讯飞 ASR/TTS 引擎已初始化")
 
+        if s.volcano_app_id and s.volcano_access_token:
+            from app.speech.tts.volcano import VolcanoTTS
+
+            self._tts_engines["volcano"] = VolcanoTTS(
+                app_id=s.volcano_app_id,
+                access_token=s.volcano_access_token,
+                cluster=s.volcano_tts_cluster,
+            )
+            logger.info("火山引擎 BigTTS 已初始化")
+
         if s.aliyun_access_key and s.aliyun_access_secret:
             try:
                 from app.speech.asr.aliyun import AliyunASR
@@ -139,25 +149,36 @@ class SpeechPipeline:
         self,
         text: str,
         dialect: DialectCode,
+        voice_name: str | None = None,
+        provider: str | None = None,
     ) -> tuple[bytes, str]:
         """
         将回复文本合成为方言语音。
 
         流程:
         1. 方言化处理
-        2. TTS 合成
+        2. TTS 合成（voice_name / provider 可选覆盖默认）
         """
         # 1. 方言化
         dialect_text = self.normalizer.denormalize(text, dialect)
 
-        # 2. TTS 合成
+        # 2. 选 TTS 引擎
         adapter = DialectRegistry.get(dialect)
         tts_config = adapter.get_tts_config()
-        tts = self.get_tts(dialect)
+        if provider:
+            if provider not in self._tts_engines:
+                logger.warning(
+                    f"TTS provider '{provider}' 未配置，回退到方言默认引擎"
+                )
+                tts = self.get_tts(dialect)
+            else:
+                tts = self._tts_engines[provider]
+        else:
+            tts = self.get_tts(dialect)
 
         result = await tts.synthesize(
             text=dialect_text,
-            voice_name=tts_config.get("voice_name", ""),
+            voice_name=voice_name or tts_config.get("voice_name", ""),
             speed=tts_config.get("speed", self.settings.tts_default_speed),
             volume=tts_config.get("volume", self.settings.tts_default_volume),
         )
